@@ -29,7 +29,7 @@ int main(int argc, char *argv[])
     std::string serial_port_path;
     pn.param<std::string>("serial_port", serial_port_path,"/dev/ttyUSB0");
 
-    ros::Publisher joy_pub = n.advertise<sensor_msgs::Joy>("/JMoteS/data", 10);
+    ros::Publisher joy_pub = n.advertise<sensor_msgs::Joy>("/joy", 10);
     ros::Subscriber remote_led_sub = n.subscribe<std_msgs::Bool>("/JMoteS/LED", 2, cmdLED);
 
     // First we open the port...

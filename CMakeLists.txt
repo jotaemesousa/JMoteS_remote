@@ -111,8 +111,8 @@ add_executable(jmotes_node src/jmotes_node.cpp)
 # add_dependencies(jmotes_node jmotes_generate_messages_cpp)
 
 ## Specify libraries to link a library or executable target against
-link_directories(~/catkin_ws/src/cereal_port/lib)
-target_link_libraries(jmotes_node ~/catkin_ws/src/cereal_port/lib/libcereal_port.so  ${catkin_LIBRARIES} ${Boost_LIBRARIES} ${cereal_port_LIBRARIES})
+
+target_link_libraries(jmotes_node   ${catkin_LIBRARIES} ${Boost_LIBRARIES} ${cereal_port_LIBRARIES})
 
 #############
 ## Install ##

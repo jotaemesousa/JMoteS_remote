@@ -149,7 +149,7 @@ void streamCallback(std::string * msg)
 
                 last_time = ros::Time::now();
 
-                ROS_INFO("received cmd: l = %d, a = %d, b = %d.", linear, angular, buttons);
+                //ROS_INFO("received cmd: l = %d, a = %d, b = %d.", linear, angular, buttons);
             }
         }
     }

@@ -27,7 +27,9 @@ int main(int argc, char *argv[])
     ros::NodeHandle pn("~");
 
     std::string serial_port_path;
+    double freq;
     pn.param<std::string>("serial_port", serial_port_path,"/dev/ttyUSB0");
+    pn.param<double>("freq", freq, 50);
 
     ros::Publisher joy_pub = n.advertise<sensor_msgs::Joy>("/joy", 10);
     ros::Subscriber remote_led_sub = n.subscribe<std_msgs::Bool>("/JMoteS/LED", 2, cmdLED);

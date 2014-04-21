@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<launch>
+
+	<!-- The remote driver -->
+		<node name="jmotes_node" pkg="jmotes" type="jmotes_node" output="screen" respawn="true" >
+			<param name="serial_port" value="/dev/JMotes_port"/>
+			<param name="baudrate" value="57600"/>
+			<param name="freq" value="20" />
+		</node>
+</launch>

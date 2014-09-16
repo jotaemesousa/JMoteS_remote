@@ -53,6 +53,12 @@ int main(int argc, char *argv[])
 
     while(n.ok())
     {
+
+        if(!serial.serialPortExists())
+        {
+            ROS_FATAL("JMoteS -- Serial port error / USB not connected!");
+            ROS_BREAK();
+        }
         if((ros::Time::now() - last_time).toNSec() < 100000000)
         {
             sensor_msgs::Joy remote_msg;
@@ -108,6 +114,8 @@ int main(int argc, char *argv[])
 
         ros::spinOnce();
         r.sleep();
+
+
     }
 
     return 0;

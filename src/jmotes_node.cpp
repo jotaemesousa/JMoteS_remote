@@ -3,6 +3,7 @@
 #include "cereal_port/CerealPort.h"
 #include "sensor_msgs/Joy.h"
 #include "std_msgs/Bool.h"
+#include "std_msgs/UInt8.h"
 #include "remote_defines.h"
 
 using namespace std;
@@ -10,6 +11,10 @@ using namespace std;
 bool openPort(const char *str, int baud);
 void streamCallback(std::string * msg);
 void cmdLED(const std_msgs::Bool::ConstPtr& cmd_led);
+void force_off(const std_msgs::Bool::ConstPtr& value);
+void time_off(const std_msgs::UInt8::ConstPtr& value);
+void force_off_cmd(void);
+void auto_off_cmd(bool value);
 
 cereal::CerealPort serial;
 int linear=0, angular=0;
@@ -28,11 +33,15 @@ int main(int argc, char *argv[])
 
     std::string serial_port_path;
     double freq;
+    bool auto_off;
     pn.param<std::string>("port", serial_port_path,"/dev/ttyUSB0");
     pn.param<double>("freq", freq, 50);
+    pn.param("auto_off", auto_off, false);
 
     ros::Publisher joy_pub = n.advertise<sensor_msgs::Joy>("/joy", 10);
     ros::Subscriber remote_led_sub = n.subscribe<std_msgs::Bool>("/JMoteS/LED", 2, cmdLED);
+    ros::Subscriber force_off_sub = n.subscribe<std_msgs::Bool>("/JMoteS/force_off", 1, force_off);
+    ros::Subscriber time_off_sub = n.subscribe<std_msgs::UInt8>("/JMoteS/time_off", 1, time_off);
 
     // First we open the port...
     if(!openPort((char*)serial_port_path.c_str(),57600))
@@ -50,6 +59,8 @@ int main(int argc, char *argv[])
 
     ros::Rate r(10);
     ros::Time start_time = ros::Time::now();
+
+    auto_off_cmd(auto_off);
 
     while(n.ok())
     {
@@ -75,7 +86,7 @@ int main(int argc, char *argv[])
             remote_msg.buttons.push_back(0);
             remote_msg.buttons.push_back((buttons & RB_BUTTON) >> 3);
             remote_msg.buttons.push_back((buttons & LB_BUTTON) >> 1);
-            remote_msg.buttons.push_back(0);            
+            remote_msg.buttons.push_back(0);
             remote_msg.buttons.push_back((buttons & X_BUTTON) >> 0);
             remote_msg.buttons.push_back((buttons & B_BUTTON) >> 2);
             remote_msg.buttons.push_back(0);
@@ -171,5 +182,43 @@ void cmdLED(const std_msgs::Bool::ConstPtr& cmd_led)
     char msg_to_send[20];
 
     num_bytes = sprintf(msg_to_send, ":led %d;", cmd_led->data);
+    serial.write(msg_to_send, num_bytes);
+}
+
+void force_off(const std_msgs::Bool::ConstPtr& value)
+{
+    int num_bytes;
+    char msg_to_send[20];
+
+    if(value->data == true)
+    {
+        force_off_cmd();
+    }
+}
+
+void time_off(const std_msgs::UInt8::ConstPtr& value)
+{
+    if (value->data >= 1 && value->data <= 15)
+    {
+        int num_bytes;
+        char msg_to_send[20];
+        num_bytes = sprintf(msg_to_send, ":tim %d;", value->data);
+        serial.write(msg_to_send, num_bytes);
+    }
+}
+
+void force_off_cmd(void)
+{
+    int num_bytes;
+    char msg_to_send[20];
+    num_bytes = sprintf(msg_to_send, ":f_off;");
+    serial.write(msg_to_send, num_bytes);
+}
+
+void auto_off_cmd(bool value)
+{
+    int num_bytes;
+    char msg_to_send[20];
+    num_bytes = sprintf(msg_to_send, ":a_off %d;", value);
     serial.write(msg_to_send, num_bytes);
 }

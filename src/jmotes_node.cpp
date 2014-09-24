@@ -5,6 +5,7 @@
 #include "std_msgs/Bool.h"
 #include "std_msgs/UInt8.h"
 #include "remote_defines.h"
+#include <signal.h>
 
 using namespace std;
 
@@ -21,6 +22,7 @@ int linear=0, angular=0;
 unsigned int buttons = 0;
 bool is_connected = false;
 ros::Time last_time;
+void intHandler(int a);
 
 int main(int argc, char *argv[])
 {
@@ -31,12 +33,14 @@ int main(int argc, char *argv[])
     ros::NodeHandle n;
     ros::NodeHandle pn("~");
 
+    signal(SIGINT, intHandler);
+
     std::string serial_port_path;
     double freq;
     bool auto_off;
     pn.param<std::string>("port", serial_port_path,"/dev/ttyUSB0");
     pn.param<double>("freq", freq, 50);
-    pn.param("auto_off", auto_off, false);
+    pn.param("auto_off", auto_off, true);
 
     ros::Publisher joy_pub = n.advertise<sensor_msgs::Joy>("/joy", 10);
     ros::Subscriber remote_led_sub = n.subscribe<std_msgs::Bool>("/JMoteS/LED", 2, cmdLED);
@@ -130,6 +134,17 @@ int main(int argc, char *argv[])
     }
 
     return 0;
+}
+
+/// void intHandler(int a)
+/**
+ *  This function is the handler of the SIGINT service.
+ */
+void intHandler(int a)
+{
+    ROS_INFO("JMoteS -- SHUTTING DOWN REMOTE");
+    force_off_cmd();
+    ros::requestShutdown();
 }
 
 bool openPort(const char *str, int baud)

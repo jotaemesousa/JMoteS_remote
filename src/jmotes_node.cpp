@@ -12,7 +12,7 @@ using namespace std;
 
 bool openPort(const char *str, int baud);
 void streamCallback(std::string * msg);
-void cmdLED(const std_msgs::Bool::ConstPtr& cmd_led);
+bool cmdLED(jmotes::red_led::Request &req, jmotes::red_led::Response &res);
 void force_off(const std_msgs::Bool::ConstPtr& value);
 void time_off(const std_msgs::UInt8::ConstPtr& value);
 void force_off_cmd(void);
@@ -44,10 +44,9 @@ int main(int argc, char *argv[])
     pn.param("auto_off", auto_off, true);
 
     ros::Publisher joy_pub = n.advertise<sensor_msgs::Joy>("/joy", 10);
-    ros::Subscriber remote_led_sub = n.subscribe<std_msgs::Bool>("/JMoteS/LED", 2, cmdLED);
     ros::Subscriber force_off_sub = n.subscribe<std_msgs::Bool>("/JMoteS/force_off", 1, force_off);
     ros::Subscriber time_off_sub = n.subscribe<std_msgs::UInt8>("/JMoteS/time_off", 1, time_off);
-    ros::ServiceServer red_led_server = n.advertiseService("")
+    ros::ServiceServer red_led_server = n.advertiseService("/JMoteS/LED", &cmdLED);
 
     // First we open the port...
     if(!openPort((char*)serial_port_path.c_str(),57600))
@@ -193,12 +192,12 @@ void streamCallback(std::string * msg)
     }
 }
 
-void cmdLED(const std_msgs::Bool::ConstPtr& cmd_led)
+bool cmdLED(jmotes::red_led::Request &req, jmotes::red_led::Response &res)
 {
     int num_bytes;
     char msg_to_send[20];
 
-    num_bytes = sprintf(msg_to_send, ":led %d;", cmd_led->data);
+    num_bytes = sprintf(msg_to_send, ":led %d;", req.led);
     serial.write(msg_to_send, num_bytes);
 }
 

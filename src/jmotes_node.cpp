@@ -6,6 +6,7 @@
 #include "std_msgs/UInt8.h"
 #include "remote_defines.h"
 #include <signal.h>
+#include "jmotes/red_led.h"
 
 using namespace std;
 
@@ -46,6 +47,7 @@ int main(int argc, char *argv[])
     ros::Subscriber remote_led_sub = n.subscribe<std_msgs::Bool>("/JMoteS/LED", 2, cmdLED);
     ros::Subscriber force_off_sub = n.subscribe<std_msgs::Bool>("/JMoteS/force_off", 1, force_off);
     ros::Subscriber time_off_sub = n.subscribe<std_msgs::UInt8>("/JMoteS/time_off", 1, time_off);
+    ros::ServiceServer red_led_server = n.advertiseService("")
 
     // First we open the port...
     if(!openPort((char*)serial_port_path.c_str(),57600))
